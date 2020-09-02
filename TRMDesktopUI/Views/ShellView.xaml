@@ -6,7 +6,15 @@
         xmlns:local="clr-namespace:TRMDesktopUI.Views"
         mc:Ignorable="d"
         Title="ShellView" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File" FontSize="18"></MenuItem>
+            <MenuItem Header="_Accont" FontSize="18">
+                <MenuItem x:Name="LoginScreen" Header="_Login"></MenuItem>
+            </MenuItem>
+        </Menu>
+        <Grid>
+            <ContentControl x:Name="ActiveItem" Margin="5"></ContentControl>
+        </Grid>
+    </DockPanel>
 </Window>
