@@ -4,7 +4,7 @@ AS
 BEGIN
 	set nocount on;
 
-	SELECT id, FirstName, LastName, EmailAddress, CreateDate
+	SELECT Id, FirstName, LastName, EmailAddress, CreateDate
 	FROM [dbo].[User]
 	WHERE Id = @Id
 
