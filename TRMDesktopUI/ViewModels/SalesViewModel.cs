@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using TRMDataManager.Library.Models;
@@ -33,6 +34,18 @@ namespace TRMDesktopUI.ViewModels
         {
             base.OnViewLoaded(view);
             await LoadProducts();
+            
+        }
+
+        private async Task  ResetSalesViewModel()
+        {
+            Cart = new BindingList<CartItemDisplayModel>();
+            await LoadProducts();
+
+            NotifyOfPropertyChange(() => SubTotal);
+            NotifyOfPropertyChange(() => Tax);
+            NotifyOfPropertyChange(() => Total);
+            NotifyOfPropertyChange(() => CanCheckOut);
         }
         private async Task LoadProducts()
         {
@@ -54,7 +67,7 @@ namespace TRMDesktopUI.ViewModels
             }
         }
 
-        private ProductDisplayModel _selectedProduct;
+       private ProductDisplayModel _selectedProduct;
 
         public ProductDisplayModel SelectedProduct
         {
@@ -206,7 +219,7 @@ namespace TRMDesktopUI.ViewModels
 
                 bool output = false;
 
-                if (SelectedCartItem?.Product.QuantityInStock > 0 )
+                if (SelectedCartItem?.QuantityInCart > 0 )
                 {
                     output = true;
                 }
@@ -237,6 +250,7 @@ namespace TRMDesktopUI.ViewModels
             NotifyOfPropertyChange(() => Tax);
             NotifyOfPropertyChange(() => Total);
             NotifyOfPropertyChange(() => CanCheckOut);
+            NotifyOfPropertyChange(() => CanAddToCart);
         }
 
         public bool CanCheckOut
@@ -269,6 +283,8 @@ namespace TRMDesktopUI.ViewModels
             }
 
             await _saleEndPoint.PostSale(Sale);
+
+            await ResetSalesViewModel();
 
         }
     }
