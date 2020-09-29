@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TRMDataManager.Library.Models;
 using TRMDesktopUI.Library.Api;
 using TRMDesktopUI.Library.Helpers;
 using TRMDesktopUI.Library.Models;
@@ -15,16 +16,18 @@ namespace TRMDesktopUI.ViewModels
     {
         IProductEndpoint _productEndpoint;
         IConfigHelper _configHelper;
-        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper)
+        ISaleEndpoint _saleEndPoint;
+        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, ISaleEndpoint saleEndPoint)
         {
             _productEndpoint = productEndpoint;
             _configHelper = configHelper;
+            _saleEndPoint = saleEndPoint;
         }
 
         protected override async void OnViewLoaded(object view)
         {
             base.OnViewLoaded(view);
-            await   LoadProducts();
+            await LoadProducts();
         }
         private async Task LoadProducts()
         {
@@ -36,8 +39,9 @@ namespace TRMDesktopUI.ViewModels
 
         public BindingList<ProductModel> Products
         {
-            get {              return _products;             }
-            set { 
+            get { return _products; }
+            set
+            {
                 _products = value;
                 NotifyOfPropertyChange(() => Products);
 
@@ -49,14 +53,16 @@ namespace TRMDesktopUI.ViewModels
         public ProductModel SelectedProduct
         {
             get { return _selectedProduct; }
-            set { _selectedProduct = value; 
+            set
+            {
+                _selectedProduct = value;
                 NotifyOfPropertyChange(() => SelectedProduct);
                 NotifyOfPropertyChange(() => CanAddToCart);
             }
         }
 
 
-        private BindingList<CartItemModel> _cart = new BindingList<CartItemModel>(); 
+        private BindingList<CartItemModel> _cart = new BindingList<CartItemModel>();
 
         public BindingList<CartItemModel> Cart
         {
@@ -74,7 +80,9 @@ namespace TRMDesktopUI.ViewModels
         public int ItemQuantity
         {
             get { return _itemQuantity; }
-            set { _itemQuantity = value;
+            set
+            {
+                _itemQuantity = value;
                 NotifyOfPropertyChange(() => ItemQuantity);
                 NotifyOfPropertyChange(() => CanAddToCart);
             }
@@ -91,13 +99,13 @@ namespace TRMDesktopUI.ViewModels
         private decimal CalculateSubTotal()
         {
             decimal subTotal = 0;
-                foreach (var item in Cart)
-                {
-                    subTotal += (item.Product.RetailPrice * item.QuantityInCart);
-                }
+            foreach (var item in Cart)
+            {
+                subTotal += (item.Product.RetailPrice * item.QuantityInCart);
+            }
 
             return subTotal;
-        }   
+        }
         public string Tax
         {
             get
@@ -109,7 +117,7 @@ namespace TRMDesktopUI.ViewModels
         private decimal CalculateTax()
         {
             decimal taxAmount = 0;
-            decimal taxRate = _configHelper.getTaxRate()/100;
+            decimal taxRate = _configHelper.getTaxRate() / 100;
 
             taxAmount = Cart.
                 Where(x => x.Product.IsTaxable).
@@ -133,13 +141,14 @@ namespace TRMDesktopUI.ViewModels
 
                 bool output = false;
                 //make sure something is selected and we have item quantity
-                if (ItemQuantity > 0) {
+                if (ItemQuantity > 0)
+                {
                     if (SelectedProduct?.QuantityInStock >= ItemQuantity)
                     {
                         output = true;
                     }
                 }
-                
+
 
                 return output;
 
@@ -173,6 +182,7 @@ namespace TRMDesktopUI.ViewModels
             NotifyOfPropertyChange(() => SubTotal);
             NotifyOfPropertyChange(() => Tax);
             NotifyOfPropertyChange(() => Total);
+            NotifyOfPropertyChange(() => CanCheckOut);
         }
 
         public bool CanRemoveFromCart
@@ -197,6 +207,7 @@ namespace TRMDesktopUI.ViewModels
             NotifyOfPropertyChange(() => SubTotal);
             NotifyOfPropertyChange(() => Tax);
             NotifyOfPropertyChange(() => Total);
+            NotifyOfPropertyChange(() => CanCheckOut);
         }
 
         public bool CanCheckOut
@@ -205,19 +216,31 @@ namespace TRMDesktopUI.ViewModels
             {
 
                 bool output = false;
-                //make sure something is in the cart
-
+                if (Cart.Count > 0)
+                {
+                    output = true;
+                }
                 return output;
-
             }
 
         }
 
-        public void CheckOut()
+        public async void CheckOut()
         {
+            //create a sale model and post to the api
+            SaleModel Sale = new SaleModel();
+
+            foreach (var item in Cart)
+            {
+                Sale.SaleDetails.Add(new SaleDetailModel
+                {
+                    ProductID = item.Product.Id,
+                    Quantity = item.QuantityInCart
+                });
+            }
+
+            await _saleEndPoint.PostSale(Sale);
 
         }
-
-
     }
 }
