@@ -60,33 +60,31 @@ namespace TRMDataManager.Library.DataAccess
 
             // save the sale model
 
-            SqlDataAccess sql = new SqlDataAccess();
-            sql.SaveData<SaleDbModel>("dbo.spSale_Insert", sale, "TRMData");
-
-
-            sale.Id = sql.LoadData<int, dynamic>("spSale_Lookup", new { sale.CashierId, sale.SaleDate }, "TRMData").FirstOrDefault();
-
-            // get the id from the sale model
-
-
-            // finishi filling in the sale detail models
-            foreach (var item in details)
+            using (SqlDataAccess sql = new SqlDataAccess())
             {
-                item.SaleId = sale.Id;
+                try
+                {
+                    sql.StartTransaction("TRMData");
+                    sql.SaveDataInTransaction<SaleDbModel>("dbo.spSale_Insert", sale);
 
-                // save the sale detail modesl
-                sql.SaveData("dbo.spSaleDetail_Insert", item, "TRMData");
-            }
-           
+                    sale.Id = sql.LoadDataInTransaction<int, dynamic>("spSale_Lookup", new { sale.CashierId, sale.SaleDate }).FirstOrDefault();
+                    foreach (var item in details)
+                    {
+                        item.SaleId = sale.Id;
+
+                        // save the sale detail modesl
+                        sql.SaveDataInTransaction("dbo.spSaleDetail_Insert", item);
+                    }
+
+                    sql.CommitTransaction();
+                }
+                catch 
+                {
+                    sql.RollbackTransaction();
+                    throw;
+                }
+           }
+
         }
-
-        //public List<ProductModel> GetProducts()
-        //{
-        //    SqlDataAccess sql = new SqlDataAccess();
-
-        //    var output = sql.LoadData<ProductModel, dynamic>("dbo.spProduct_GetAll", new { }, "TRMData");
-
-        //    return output;
-        //}
-    }
+   }
 }
