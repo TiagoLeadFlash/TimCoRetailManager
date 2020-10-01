@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TRMDesktopUI.Library.Models;
 
-namespace TRMDesktopUI.Helpers
+namespace TRMDesktopUI.Library.Api
 {
     public class APIHelper : IAPIHelper
     {
@@ -61,6 +61,12 @@ namespace TRMDesktopUI.Helpers
                 }
             }
         }
+
+        public void LogOffUser()
+        {
+            _apiClient.DefaultRequestHeaders.Clear();
+        }
+
         public async Task GetLoggedInUserInfo(string token)
         {
             _apiClient.DefaultRequestHeaders.Clear();

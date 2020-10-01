@@ -5,7 +5,6 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using TRMDataManager.Library.Models;
-using TRMDesktopUI.Helpers;
 
 namespace TRMDesktopUI.Library.Api
 {
