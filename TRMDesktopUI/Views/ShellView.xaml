@@ -11,9 +11,14 @@
             <MenuItem Header="_File" FontSize="18">
                 <MenuItem x:Name="ExitApplication" Header="E_xit"></MenuItem>
             </MenuItem>
+            <MenuItem Header="_Users" FontSize="18">
+                <MenuItem x:Name="UserManagement" Header="User_Management"></MenuItem>
+            </MenuItem>
+
             <MenuItem Header="_Accont" FontSize="18"  Visibility="{Binding IsLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
                 <MenuItem x:Name="LogOut" Header="_Log Out"></MenuItem>
             </MenuItem>
+            
         </Menu>
         <Grid>
             <ContentControl x:Name="ActiveItem" Margin="20 5 20 20"></ContentControl>
