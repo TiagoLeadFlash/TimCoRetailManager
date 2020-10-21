@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Configuration;
 using System.Web.Http;
 using TRMDataManager.Library.DataAccess;
 using TRMDataManager.Library.Models;
@@ -58,6 +59,45 @@ namespace TRMDataManager.Controllers
             return output;
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        [Route("api/User/Admin/GetAllRoles")]
+        public Dictionary<string, string> GetAllRoles()
+        {
+
+            using (var context = new ApplicationDbContext())
+            {
+                var roles = context.Roles.ToDictionary(x => x.Id, x => x.Name);
+                return roles;
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [Route("api/User/Admin/AddRole")]
+        public void AddARole(UserRolePairModel pairing)
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var userStore = new UserStore<ApplicationUser>(context);
+                var userManager = new UserManager<ApplicationUser>(userStore);
+
+                userManager.AddToRole(pairing.UserID, pairing.RoleName);
+            }
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [Route("api/User/Admin/RemoveRole")]
+        public void RemoveARole(UserRolePairModel pairing)
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var userStore = new UserStore<ApplicationUser>(context);
+                var userManager = new UserManager<ApplicationUser>(userStore);
+                userManager.RemoveFromRole(pairing.UserID, pairing.RoleName);
+            }
+
+        }
     }
 }
  
